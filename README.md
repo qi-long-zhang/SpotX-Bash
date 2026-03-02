@@ -14,6 +14,9 @@
     <p align="center">
         <strong>Latest supported version:</strong> 1.2.84.474.g9f006f58
     </p> 
+    <p align="center">
+        This repository uses GitHub Actions to automatically update <code>spotx.sh</code> with the latest Spotify version.
+    </p>
 </center>
 
 ### Features:
