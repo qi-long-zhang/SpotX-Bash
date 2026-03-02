@@ -59,8 +59,8 @@ jobs:
           ver() { echo "$@" | perl -lane 'printf "%d%03d%04d%05d
 ", split(/\./, $_), (0)x4'; }
 
-          current_ver_num="${{ steps.get_current_version.outputs.current_ver_num }}"
-          latest_ver_num="${{ steps.get_latest_version.outputs.latest_ver_num }}"
+          current_ver_num="${{ steps.get_current_version.outputs.current_version_num }}"
+          latest_ver_num="${{ steps.get_latest_version.outputs.latest_version_num }}"
           
           echo "Comparing current ($current_ver_num) with latest ($latest_ver_num)"
 
