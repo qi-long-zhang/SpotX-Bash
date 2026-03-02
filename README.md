@@ -35,11 +35,7 @@
 
 - Run the following command in terminal:
 ```
-bash <(curl -sSL https://spotx-official.github.io/run.sh)
-```
-or
-```
-bash <(curl -sSL https://raw.githubusercontent.com/SpotX-Official/SpotX-Bash/main/spotx.sh)
+bash <(curl -sSL https://raw.githubusercontent.com/hrtdream/SpotX-Bash/main/spotx.sh)
 ```
 - By default...
   - all supported experimental features are enabled
@@ -79,23 +75,23 @@ bash <(curl -sSL https://raw.githubusercontent.com/SpotX-Official/SpotX-Bash/mai
 
 **Run SpotX-Bash, clear app cache, enable dev mode, hide non-music categories** 
 ```
-bash <(curl -sSL https://spotx-official.github.io/run.sh) -cdh
+bash <(curl -sSL https://raw.githubusercontent.com/hrtdream/SpotX-Bash/main/spotx.sh) -cdh
 ```
 **Run SpotX-Bash, enable interactive mode, set custom path to client** 
 ```
-bash <(curl -sSL https://spotx-official.github.io/run.sh) -i -P $HOME/Downloads/
+bash <(curl -sSL https://raw.githubusercontent.com/hrtdream/SpotX-Bash/main/spotx.sh) -i -P $HOME/Downloads/
 ```
 **Run SpotX-Bash, set paid premium-tier subscriber** 
 ```
-bash <(curl -sSL https://spotx-official.github.io/run.sh) -p
+bash <(curl -sSL https://raw.githubusercontent.com/hrtdream/SpotX-Bash/main/spotx.sh) -p
 ```
 **Run SpotX-Bash, install latest testing branch client version (Linux)** 
 ```
-bash <(curl -sSL https://spotx-official.github.io/run.sh) --installdeb
+bash <(curl -sSL https://raw.githubusercontent.com/hrtdream/SpotX-Bash/main/spotx.sh) --installdeb
 ```
 **Run SpotX-Bash, block auto-updates, install latest supported client version (macOS)** 
 ```
-bash <(curl -sSL https://spotx-official.github.io/run.sh) -B --installmac
+bash <(curl -sSL https://raw.githubusercontent.com/hrtdream/SpotX-Bash/main/spotx.sh) -B --installmac
 ```
 </details>
 
