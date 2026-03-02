@@ -214,10 +214,16 @@ macos_prepare() {
   macos_set_version
   archVar=$(sysctl -n machdep.cpu.brand_string | grep -q "Apple" && echo "arm64" || echo "x86_64")
   [[ "${debug}" ]] && echo -e "${green}Debug:${clr} ${archVar} detected"
-  grab1=$(echo "==wSRhUZwUTejxGeHNGdGdUZslTaiBnRXJmdJJjYzpkMMVjWXFWYKVkV21kajBnWHRGbwJDT0ljMZVXSXR2bShVYulTeMZTTINGMShUY" | rev | base64 --decode | base64 --decode)
-  grab2=$(echo "=0zYTZ2ZzpWS4FVaJdWUuJGcKh0YnNHVNtWQTB1ZRdlWv50RkhWMHp0ZzhUS2J1RJ1WWDlEcRdlWv50RkhWMHp0bRdlW1xWbaxmUXl0ZZlmSnhzULZjSXZ2dJRET4NnbM5WSTZWeG1mV1lzVhpnSYplM0hkSpN2UMlDbU10N1knSpBjbjhmWGFmaKhVW3IVaJ5GMTZmeNpXZ1VFWmJzcuxEMod0S2N2QJxWNXx0Z312YsJESJhjQplUOGpWWop0MadjUpl0Z3BzY0F0UjRXQDJWeWNTW" | rev | base64 --decode | base64 --decode)
-  grab3=""; for i in {1..5}; do grab3=$(eval "${grab2}"); [[ -n "${grab3}" ]] && break || sleep 2; done
-  [[ -z "${grab3}" ]] && { echo -e "\n${red}Error:${clr} Unable to retrieve download link\n" >&2; exit 1; }
+  
+  # Fetch latest version info from versions.json
+  json_data=$(curl -s https://loadspot.pages.dev/versions.json)
+  grab3=$(echo "$json_data" | perl -0777 -ne '
+    while (/"(\d+\.\d+\.\d+\.\d+)":\s*\{.*?"buildType":\s*"Release".*?"mac":\s*\{.*?"'"$archVar"'":\s*"([^"]+)"/sg) {
+      print $2; exit;
+    }
+  ')
+
+  [[ -z "${grab3}" ]] && { echo -e "\n${red}Error:${clr} Unable to retrieve download link for macOS\n" >&2; exit 1; }
   fileVar=$(basename "${grab3}")
   [[ "${installMac}" ]] && installClient='true' && downloadVer=$(echo "${fileVar}" | perl -ne '/-(\d+\.\d+\.\d+\.\d+)/ && print "$1"')
   [[ "${downloadVer}" ]] && (($(ver "${downloadVer}") < $(ver "1.1.59.710"))) && { echo -e "${red}Error:${clr} ${downloadVer} not supported by SpotX-Bash\n" >&2; exit 1; }
@@ -255,14 +261,20 @@ linux_deb_prepare() {
   installOutput="${installPath}"
   linux_client_variant
   installClient='true'
-  grab1=$(echo "=0TP3xEd5ITW1tmbaBnUzI2dO5GT1o0MiBDbyMmdChlW5lTeMZTTINGMShUY" | rev | base64 --decode | base64 --decode)
-  [[ "${stableVar}" ]] && \
-  grab2=$(echo "==QP9cWS6ZlMahGdykFaCFDTwkFRaRnRXxUNKhVW1xWbZZXVXpVeadFT1lTbiZXVHJWaGdEZ6lTejBjTYF2axgVTpZUbj5GdIpUaBl3Y0F0UjRXQDJWeWNTW" | rev | base64 --decode | base64 --decode) || \
-  grab2=$(echo "==QPJl3YsR2VZJnTXlVU5MkTyE1VihWMTVWeG1mYwpkMMxmVtNWbxkmY2VjMM5WNXFGMOhlWwkTejBjTYF2axgVTpZUbj5GdIpUaBl3Y0F0UjRXQDJWeWNTW" | rev | base64 --decode | base64 --decode)
-  grab3=$(eval "${grab2}" 2>/dev/null)
-  grab4=$(echo "${grab3}" | grep -m 1 "^Filename: " | perl -pe 's/^Filename: //')
-  grab5="${grab1}${grab4}"
-  fileVar=$(basename "${grab4}")
+
+  # Fetch latest deb info from versions_deb.json
+  json_data=$(curl -s https://loadspot.pages.dev/versions_deb.json)
+  download_url=$(echo "$json_data" | perl -0777 -ne '
+    if (/"(\d+\.\d+\.\d+\.\d+)":\s*\{.*?"links":\s*\{.*?"amd64":\s*"([^"]+)"/s) {
+      print $2;
+      exit;
+    }
+  ')
+
+  [[ -z "${download_url}" ]] && { echo -e "\n${red}Error:${clr} Unable to retrieve debian download link from JSON.\n" >&2; exit 1; }
+  
+  grab5="${download_url}"
+  fileVar=$(basename "${download_url}")
   downloadVer=$(echo "${fileVar}" | perl -pe 's/^[a-z-]+_([0-9.]+)\.g.*/\1/')
   [[ ! -f "${installPath}/Apps/xpui.spa" ]] && notInstalled='true'
 }
