@@ -1,0 +1,94 @@
+name: Auto-update Spotify Version
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [ 'update-spotify-version' ]
+
+jobs:
+  update:
+    runs-on: macos-latest # Use macOS environment to ensure script compatibility
+    permissions:
+      contents: write # Grant the action permission to push code back to the repository
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Get Current Script Version
+        id: get_current_version
+        run: |
+          # Extract the current version number from the script
+          current_ver_full=$(grep 'buildVer=' spotx.sh | cut -d'"' -f2)
+          current_ver_num=$(echo "$current_ver_full" | perl -ne '/(\d+\.\d+\.\d+\.\d+)/ && print "$1"')
+          echo "Current script version: $current_ver_full"
+          echo "current_version_full=$current_ver_full" >> $GITHUB_OUTPUT
+          echo "current_version_num=$current_ver_num" >> $GITHUB_OUTPUT
+
+      - name: Get Latest Spotify Version
+        id: get_latest_version
+        run: |
+          # This logic is directly extracted from the spotx.sh script to get the latest macOS Spotify download link.
+          # Note: This might break if Spotify changes how it provides download links.
+          grab2=$(echo "=0zYTZ2ZzpWS4FVaJdWUuJGcKh0YnNHVNtWQTB1ZRdlWv50RkhWMHp0ZzhUS2J1RJ1WWDlEcRdlWv50RkhWMHp0bRdlW1xWbaxmUXl0ZZlmSnhzULZjSXZ2dJRET4NnbM5WSTZWeG1mV1lzVhpnSYplM0hkSpN2UMlDbU10N1knSpBjbjhmWGFmaKhVW3IVaJ5GMTZmeNpXZ1VFWmJzcuxEMod0S2N2QJxWNXx0Z312YsJESJhjQplUOGpWWop0MadjUpl0Z3BzY0F0UjRXQDJWeWNTW" | rev | base64 --decode | base64 --decode)
+          download_url=$(eval "${grab2}" 2>/dev/null)
+          
+          if [ -z "$download_url" ]; then
+            echo "::error::Failed to fetch download URL."
+            exit 1
+          fi
+          echo "Latest download URL: $download_url"
+          
+          # Extract the full version number from the download link filename
+          latest_ver_full=$(basename "$download_url" | grep -oE '(\d+\.\d+\.\d+\.\d+\.g[a-f0-9]+)')
+          if [ -z "$latest_ver_full" ]; then
+            echo "::error::Failed to extract version from URL."
+            exit 1
+          fi
+
+          latest_ver_num=$(echo "$latest_ver_full" | perl -ne '/(\d+\.\d+\.\d+\.\d+)/ && print "$1"')
+          
+          echo "Latest Spotify version found: $latest_ver_full"
+          echo "latest_version_full=$latest_ver_full" >> $GITHUB_OUTPUT
+          echo "latest_version_num=$latest_ver_num" >> $GITHUB_OUTPUT
+
+      - name: Compare Versions and Update Files
+        id: updater
+        run: |
+          # Version comparison function from the script
+          ver() { echo "$@" | perl -lane 'printf "%d%03d%04d%05d
+", split(/\./, $_), (0)x4'; }
+
+          current_ver_num="${{ steps.get_current_version.outputs.current_ver_num }}"
+          latest_ver_num="${{ steps.get_latest_version.outputs.latest_ver_num }}"
+          
+          echo "Comparing current ($current_ver_num) with latest ($latest_ver_num)"
+
+          if [ $(ver "$latest_ver_num") -gt $(ver "$current_ver_num") ]; then
+            echo "New version found! Updating files."
+            current_ver_full="${{ steps.get_current_version.outputs.current_version_full }}"
+            latest_ver_full="${{ steps.get_latest_version.outputs.latest_version_full }}"
+            
+            # 1. Update spotx.sh
+            sed -i "" "s/buildVer=\"$current_ver_full\"/buildVer=\"$latest_ver_full\"/" spotx.sh
+            echo "spotx.sh updated."
+
+            # 2. Update README.md
+            sed -i "" "s/$current_ver_full/$latest_ver_full/g" README.md
+            echo "README.md updated."
+            
+            echo "updated=true" >> $GITHUB_OUTPUT
+            echo "new_version=$latest_ver_full" >> $GITHUB_OUTPUT
+          else
+            echo "Files are already up to date."
+            echo "updated=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and Push Changes
+        if: steps.updater.outputs.updated == 'true'
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add spotx.sh README.md
+          git commit -m "build: Auto-update Spotify version to ${{ steps.updater.outputs.new_version }}"
+          git push
