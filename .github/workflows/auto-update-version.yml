@@ -28,23 +28,12 @@ jobs:
       - name: Get Latest Spotify Version
         id: get_latest_version
         run: |
-          # This logic is directly extracted from the spotx.sh script to get the latest macOS Spotify download link.
-          # Note: This might break if Spotify changes how it provides download links.
-          archVar=$(sysctl -n machdep.cpu.brand_string | grep -q "Apple" && echo "arm64" || echo "x86_64")
-          grab1=$(echo "==wSRhUZwUTejxGeHNGdGdUZslTaiBnRXJmdJJjYzpkMMVjWXFWYKVkV21kajBnWHRGbwJDT0ljMZVXSXR2bShVYulTeMZTTINGMShUY" | rev | base64 --decode | base64 --decode)
-          grab2=$(echo "=0zYTZ2ZzpWS4FVaJdWUuJGcKh0YnNHVNtWQTB1ZRdlWv50RkhWMHp0ZzhUS2J1RJ1WWDlEcRdlWv50RkhWMHp0bRdlW1xWbaxmUXl0ZZlmSnhzULZjSXZ2dJRET4NnbM5WSTZWeG1mV1lzVhpnSYplM0hkSpN2UMlDbU10N1knSpBjbjhmWGFmaKhVW3IVaJ5GMTZmeNpXZ1VFWmJzcuxEMod0S2N2QJxWNXx0Z312YsJESJhjQplUOGpWWop0MadjUpl0Z3BzY0F0UjRXQDJWeWNTW" | rev | base64 --decode | base64 --decode)
-          download_url=""; for i in {1..5}; do download_url=$(eval "${grab2}"); [[ -n "${download_url}" ]] && break || sleep 2; done
+          # Fetch the latest version from versions.json
+          # We look for the first entry with buildType: Release
+          latest_ver_full=$(curl -s https://loadspot.pages.dev/versions.json | jq -r 'to_entries[] | select(.value.buildType == "Release") | .value.fullversion' | head -n 1)
           
-          if [ -z "$download_url" ]; then
-            echo "::error::Failed to fetch download URL."
-            exit 1
-          fi
-          echo "Latest download URL: $download_url"
-          
-          # Extract the full version number from the download link filename
-          latest_ver_full=$(basename "$download_url" | grep -oE '(\d+\.\d+\.\d+\.\d+\.g[a-f0-9]+)')
           if [ -z "$latest_ver_full" ]; then
-            echo "::error::Failed to extract version from URL."
+            echo "::error::Failed to fetch version from JSON."
             exit 1
           fi
 
