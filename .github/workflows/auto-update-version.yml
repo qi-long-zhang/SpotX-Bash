@@ -56,8 +56,7 @@ jobs:
         id: updater
         run: |
           # Version comparison function from the script
-          ver() { echo "$@" | perl -lane 'printf "%d%03d%04d%05d
-", split(/\./, $_), (0)x4'; }
+          ver() { echo "$@" | perl -lane 'printf "%d%03d%04d%05d\n", split(/\./, $_), (0)x4'; }
 
           current_ver_num="${{ steps.get_current_version.outputs.current_version_num }}"
           latest_ver_num="${{ steps.get_latest_version.outputs.latest_version_num }}"
