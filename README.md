@@ -15,21 +15,9 @@
         <strong>Latest supported version:</strong> 1.2.84.477.gcfdf84e8
     </p> 
     <p align="center">
-        <strong>This repository uses GitHub Actions to automatically update <code>spotx.sh</code> with the latest Spotify version.</strong>
+        This repository uses GitHub Actions to automatically update <code>spotx.sh</code> with the latest Spotify version.
     </p>
 </center>
-
-### Features:
-
-- Block all audio, banner & video ads
-- Block logging
-- Enable developer mode
-- Enable experimental features
-- Hide audiobooks, episodes & podcasts on home screen
-- Block automatic updates (macOS)
-- Install supported desktop client versions (macOS)
-- Install latest desktop client on APT-based distros (Linux)
-- Supports all Linux distros and OS X/macOS 10.11+
 
 ### Usage:
 
@@ -43,6 +31,18 @@ bash <(curl -sSL https://raw.githubusercontent.com/hrtdream/SpotX-Bash/main/spot
   - macOS client auto-updates are NOT disabled, block auto-updates with `-B` / `--blockupdates` flag
 - View additional flags/options and examples in the `Options` section below
 - For more information, see the [FAQ](https://github.com/SpotX-Official/SpotX-Bash/wiki/SpotX%E2%80%90Bash-FAQ)
+
+### Features:
+
+- Block all audio, banner & video ads
+- Block logging
+- Enable developer mode
+- Enable experimental features
+- Hide audiobooks, episodes & podcasts on home screen
+- Block automatic updates (macOS)
+- Install supported desktop client versions (macOS)
+- Install latest desktop client on APT-based distros (Linux)
+- Supports all Linux distros and OS X/macOS 10.11+
 
 ### Options:
 <details>
